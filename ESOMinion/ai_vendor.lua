@@ -2,6 +2,7 @@
 -- ai_vendor
 --****************************************************************************
 ai_vendor={}
+
 ai_vendor.queue = nil
 ai_vendor.vendored = false
 
@@ -110,7 +111,7 @@ ml_log("e_gotovendor")
 								e_movetovendor.merchantstep = 1
 								if ( gRepair == "1" and ai_vendor.CheckDurability()== true ) then
 									d("Repairing items")
-									e("RepairAll()")
+									-- e("RepairAll()") Now handled with "EVENT_OPEN_STORE" event
 									ml_global_information.Wait(1000)
 									return ml_log(true)
 								end								
@@ -142,8 +143,8 @@ ml_log("e_gotovendor")
 							if (e_movetovendor.merchantstep == 3) then
 								e_movetovendor.merchantstep = 4
 								if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
-									d("Selling items")				
-									e("SellAllJunk()")
+									-- d("Selling items") Handled with "EVENT_OPEN_STORE" event				
+									-- e("SellAllJunk()") Handled with "EVENT_OPEN_STORE" event
 									ml_global_information.Wait(1000)
 									return ml_log(true)
 								end								
@@ -607,4 +608,14 @@ function ai_vendor.CheckDurability()
 	return false
 end
 
+function ai_vendor.SellAndRepair()
+	if ( gVendor == "1" and e("HasAnyJunk(1)") ) then
+		e("SellAllJunk()")
+	end
+	if ( gRepair == "1" and ai_vendor.CheckDurability()== true ) then
+		e("RepairAll()")
+	end
+end
 
+RegisterForEvent("EVENT_OPEN_STORE", true)
+RegisterEventHandler("GAME_EVENT_OPEN_STORE",ai_vendor.SellAndRepair)
